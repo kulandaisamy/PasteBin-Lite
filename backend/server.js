@@ -10,6 +10,13 @@ import {
   getExpiresAt,
 } from "./timingLogic.js";
 
+import { Redis } from "@upstash/redis";
+
+const redis=new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+})
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -34,7 +41,7 @@ app.get("/api/healthz", (req, res) => {
   }
 });
 
-app.post("/api/pastes", (req, res) => {
+app.post("/api/pastes", async (req, res) => {
   try {
     
     const { content, ttl_seconds, max_views } = req.body;
@@ -42,12 +49,13 @@ app.post("/api/pastes", (req, res) => {
       return res.status(400).json({ ok: false, error: "content is required" });
     }
     let id = Math.random().toString(36).slice(2, 10);
-    paste[id] = {
+    const pasteContent = {
       content,
       remaining_views: max_views,
       time_limit: ttl_seconds,
       created_at: getNow(req),
     };
+    await redis.set(id,pasteContent)
     res.status(201).json({
       ok: true,
       id,
@@ -58,17 +66,18 @@ app.post("/api/pastes", (req, res) => {
   }
 });
 
-app.get("/api/pastes/:id", (req, res) => {
+app.get("/api/pastes/:id", async (req, res) => {
   const { id } = req.params;
-  const pasteVal = paste[id];
+  const pasteVal = await redis.get(id);
   if (!pasteVal) {
   
     return res.status(404).json({ ok: false, error: "paste not found" });
   }
+
   let now = getNow(req);
   if (isExpired(pasteVal, now) || !hasViewsLeft(pasteVal)) {
-    
-    delete paste[id];
+
+    await redis.del(id);
     return res.status(404).json({ ok: false });
   }
   decrementViews(pasteVal);
@@ -80,23 +89,24 @@ app.get("/api/pastes/:id", (req, res) => {
   });
 });
 
-app.get("/p/:id",(req,res)=>{
+app.get("/p/:id",async (req,res)=>{
   const { id } = req.params;
-  const pasteVal = paste[id];
+  const pasteVal = await redis.get(id);
   if (!pasteVal) {
    
     return res.status(404).json({ ok: false, error: "paste not found" });
   }
+ 
   let now = getNow(req);
   if (isExpired(pasteVal, now) || !hasViewsLeft(pasteVal)) {
    
-    delete paste[id];
+    await redis.del(id);
     return res.status(404).json({ ok: false });
   }
   decrementViews(pasteVal);
   
   res.status(200).type("text/html").send(
-    `<DOCTYPE html>
+    `<!DOCTYPE html>
     <html>
     <body>
     <pre>${pasteVal.content}</pre>
