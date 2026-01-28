@@ -11,7 +11,7 @@ function InputContainer() {
   const [value,setValue]=useState("");
   
   const checkHealthConnection = async () => {
-    const response = await fetch("http://localhost:4000/api/healthz");
+    const response = await fetch("/api/healthz");
 
     setBackend(response.ok);
   };
@@ -21,7 +21,7 @@ function InputContainer() {
 
   const handlePaste = async (e) => {
     e.preventDefault();
-    const response = await fetch(`http://localhost:4000/api/pastes`, {
+    const response = await fetch(`/api/pastes`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -39,7 +39,7 @@ function InputContainer() {
   };
 
   const handleView= async(id)=>{
-    const response=await fetch(`http://localhost:4000/p/${id}`,{
+    const response=await fetch(`/p/${id}`,{
         method:"GET",
         headers:{
             "Content-Type":"application/json"
@@ -56,7 +56,7 @@ console.log(cleanText);
   }
 
   const handleJson=async (id)=>{
-    const response=await fetch(`http://localhost:4000/api/pastes/${id}`,{
+    const response=await fetch(`/api/pastes/${id}`,{
         method:"GET",
         headers:{
             "Content-Type":"application/json"
