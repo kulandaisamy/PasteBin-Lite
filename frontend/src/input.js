@@ -9,9 +9,10 @@ function InputContainer() {
   const [pasteUrl,setPasteUrl]=useState([]);
   const [showPopUp,setPopUp]=useState(false);
   const [value,setValue]=useState("");
+  const baseUrl="https://backend-1-sa89.onrender.com"
   
   const checkHealthConnection = async () => {
-    const response = await fetch("/api/healthz");
+    const response = await fetch(`${baseUrl}/api/healthz`);
 
     setBackend(response.ok);
   };
@@ -21,7 +22,7 @@ function InputContainer() {
 
   const handlePaste = async (e) => {
     e.preventDefault();
-    const response = await fetch(`/api/pastes`, {
+    const response = await fetch(`${baseUrl}/api/pastes`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -39,7 +40,7 @@ function InputContainer() {
   };
 
   const handleView= async(id)=>{
-    const response=await fetch(`/p/${id}`,{
+    const response=await fetch(`${baseUrl}/p/${id}`,{
         method:"GET",
         headers:{
             "Content-Type":"application/json"
@@ -56,7 +57,7 @@ console.log(cleanText);
   }
 
   const handleJson=async (id)=>{
-    const response=await fetch(`/api/pastes/${id}`,{
+    const response=await fetch(`${baseUrl}/api/pastes/${id}`,{
         method:"GET",
         headers:{
             "Content-Type":"application/json"
