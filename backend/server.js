@@ -21,7 +21,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 let paste = {};
-const PORT = 4000;
+const PORT = process.env.PORT || 3000;
 const initialise = async () => {
   try {
     app.listen(PORT, () => {
