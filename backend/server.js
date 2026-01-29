@@ -25,7 +25,7 @@ const PORT = process.env.PORT || 3000;
 const initialise = async () => {
   try {
     app.listen(PORT, () => {
-      console.log("backend start run on 4000");
+      console.log(`backend start run on ${PORT}`);
     });
   } catch (e) {
     console.log(e);
